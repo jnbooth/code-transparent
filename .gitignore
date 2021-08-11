@@ -1,0 +1,7 @@
+# visual studio code source
+/code/ 
+# makepkg artifacts
+/src/
+/pkg/
+# created packages
+/*.pkg.tar.zst

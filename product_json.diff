@@ -1,0 +1,23 @@
+--- product.json
++++ product.json
+@@ -1,4 +1,20 @@
+ {
++	"quality": "stable",
++	"extensionsGallery": {
++		"serviceUrl": "https://marketplace.visualstudio.com/_apis/public/gallery",
++		"cacheUrl": "https://vscode.blob.core.windows.net/gallery/index",
++		"itemUrl": "https://marketplace.visualstudio.com/items"
++	},
++	"linkProtectionTrustedDomains": [
++		"https://open-vsx.org"
++	],
++	"documentationUrl": "https://code.visualstudio.com/docs",
++	"requestFeatureUrl": "https://github.com/Microsoft/vscode/issues",
++	"introductoryVideosUrl": "https://go.microsoft.com/fwlink/?linkid=832146",
++	"tipsAndTricksUrl": "https://go.microsoft.com/fwlink/?linkid=852118",
++	"keyboardShortcutsUrlLinux": "https://go.microsoft.com/fwlink/?linkid=832144",
++	"commit": "@COMMIT@",
++	"date": "@DATE@",
+ 	"nameShort": "Code - OSS",
+ 	"nameLong": "Code - OSS",
+ 	"applicationName": "code-oss",
