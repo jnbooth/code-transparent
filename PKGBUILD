@@ -13,8 +13,8 @@ pkgdesc='The Open Source build of Visual Studio Code (vscode) editor - with tran
 #   - erbium: 12
 #   - fermium: 14
 # Important: Remember to check https://github.com/microsoft/vscode/blob/master/.yarnrc (choose correct tag) for target electron version
-_electron=electron
-pkgver=1.59.0
+_electron=electron17
+pkgver=1.67.2
 pkgrel=1
 arch=('x86_64')
 url='https://github.com/microsoft/vscode'
@@ -23,7 +23,7 @@ depends=($_electron 'libsecret' 'libx11' 'libxkbfile' 'ripgrep')
 optdepends=('bash-completion: Bash completions'
             'zsh-completions: ZSH completitons'
             'x11-ssh-askpass: SSH authentication')
-makedepends=('git' 'gulp' 'npm' 'python2' 'yarn' 'nodejs-lts-fermium')
+makedepends=('git' 'gulp' 'npm' 'python' 'yarn' 'nodejs-lts-gallium')
 conflicts=('code')
 provides=('code' 'vscode')
 install='code-transparent.install'
@@ -31,12 +31,18 @@ source=("$_pkgname::git+$url.git#tag=$pkgver"
         'code.js'
         'code.sh'
         'product_json.diff'
-        'transparent.diff')
+        'transparent.diff'
+        'fix-first-window-not-transparent.diff'
+        'fix-terminal-not-transparent.diff'
+        'more-recents.diff')
 sha512sums=('SKIP'
-            '6e8ee1df4dd982434a8295ca99e786a536457c86c34212546e548b115081798c5492a79f99cd5a3f1fa30fb71d29983aaabc2c79f4895d4a709d8354e9e2eade'
-            'b8bdb0e53cf8748140ed444c9b02cb6a57a7e1e120d96861d4cc9f79744a987f0253c052a238c78aa2c3f86459c4afb6f3b687435f0588d8f640822a9908b257'
-            'ae8a8a51c0aede5be2fa3579612c3eca622f001953870c7744f033938160fca4da416c0a9c1381910dca4907910dbf7cdebe50185c3c35931add79a5b83838d2'
-            '04e92d392aba2bc8f8995d751d82b67bb5c10d6432b178fa1b51566872ee639a7f5dfbe9d62a2a9dc60b4f51a6d811cb99a15ca6d4e834375b1577f791ccd06a')
+            'SKIP'
+            'SKIP'
+            'SKIP'
+            'SKIP'
+            'SKIP'
+            'SKIP'
+            'SKIP')
 
 # Even though we don't officially support other archs, let's
 # allow the user to use this PKGBUILD to compile the package
@@ -70,6 +76,17 @@ prepare() {
 
   # enable window transparency
   patch -p1 <../transparent.diff
+
+  # fixes sometimes the first code window is not transparent
+  # https://aur.archlinux.org/packages/code-transparent/#comment-775691
+  # https://github.com/electron/electron/issues/16809
+  patch -p1 <../fix-first-window-not-transparent.diff
+
+  # fixes black background on the terminal
+  patch -p1 <../fix-terminal-not-transparent.diff
+
+  # double the number of recent items
+  patch -p1 <../more-recents.diff
 
   # Set the commit and build date
   local _commit=$(git rev-parse HEAD)
@@ -108,29 +125,14 @@ prepare() {
 }
 
 build() {
-  # https://github.com/mapbox/node-sqlite3/issues/1044
-  mkdir -p path
-  ln -sf /usr/bin/python2 path/python
-  export PATH="$PWD/path:$PATH"
-
   cd $_pkgname
 
   yarn install --arch=$_vscode_arch
 
-  # The default memory limit may be too low for current versions of node
-  # to successfully build vscode. Change it if this number still doesn't
-  # work for your system.
-  mem_limit="--max_old_space_size=8192"
-
-  if ! /usr/bin/node $mem_limit /usr/bin/gulp vscode-linux-$_vscode_arch-min
-  then
-      echo
-      echo "*** NOTE: If the build failed due to running out of file handles (EMFILE),"
-      echo "*** you will need to raise your max open file limit."
-      echo "*** You can check this for more information on how to increase this limit:"
-      echo "***    https://ro-che.info/articles/2017-03-26-increase-open-files-limit"
-      exit 1
-  fi
+  gulp compile-build
+  gulp compile-extension-media
+  gulp compile-extensions-build
+  gulp vscode-linux-$_vscode_arch-min
 }
 
 package() {
@@ -139,7 +141,7 @@ package() {
   cp -r --no-preserve=ownership --preserve=mode VSCode-linux-$_vscode_arch/resources/app/* "$pkgdir"/usr/lib/$_pkgname/
 
   # Replace statically included binary with system copy
-  ln -sf /usr/bin/rg "$pkgdir"/usr/lib/code/node_modules.asar.unpacked/vscode-ripgrep/bin/rg
+  ln -sf /usr/bin/rg "$pkgdir"/usr/lib/code/node_modules.asar.unpacked/@vscode/ripgrep/bin/rg
 
   # Install binary
   install -Dm 755 code.sh "$pkgdir"/usr/bin/code-oss

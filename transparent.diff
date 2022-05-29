@@ -1,19 +1,10 @@
---- a/build/builtin/main.js
-+++ b/build/builtin/main.js
-@@ -26,6 +26,7 @@ app.once('ready', () => {
- 	window = new BrowserWindow({
- 		width: 800,
- 		height: 600,
-+		transparent: true,
- 		webPreferences: {
- 			nodeIntegration: true,
- 			contextIsolation: false,
+diff --git a/src/main.js b/src/main.js
 --- a/src/main.js
 +++ b/src/main.js
-@@ -238,6 +238,10 @@ function configureCommandlineSwitchesSync(cliArgs) {
- 		}
- 	});
- 
+@@ -157,6 +157,10 @@ 			}
+		}
+	});
+
 +	// enable transparent
 +	app.commandLine.appendSwitch('enable-transparent-visuals');
 +	app.commandLine.appendSwitch('use-gl', 'desktop');
@@ -21,41 +12,23 @@
  	// Support JS Flags
  	const jsFlags = getJSFlags(cliArgs);
  	if (jsFlags) {
-@@ -428,7 +432,7 @@ function configureCrashReporter() {
- 			companyName: companyName,
- 			productName: productName,
- 			submitURL,
--			uploadToServer: !crashReporterDirectory,
-+			uploadToServer: false,
- 			compress: true
- 		});
- 	}
---- a/src/vs/code/electron-main/app.ts
-+++ b/src/vs/code/electron-main/app.ts
-@@ -348,6 +348,7 @@ export class CodeApplication extends Disposable {
- 	}
- 
- 	async startup(): Promise<void> {
-+		await new Promise((resolve) => setTimeout(resolve, 400));
- 		this.logService.debug('Starting VS Code');
- 		this.logService.debug(`from: ${this.environmentMainService.appRoot}`);
- 		this.logService.debug('args:', this.environmentMainService.args);
+diff --git a/src/vs/platform/theme/electron-main/themeMainService.ts b/src/vs/platform/theme/electron-main/themeMainService.ts
+index 189811d6fdf..d10bd05bced 100644
 --- a/src/vs/platform/theme/electron-main/themeMainService.ts
 +++ b/src/vs/platform/theme/electron-main/themeMainService.ts
 @@ -3,7 +3,7 @@
   *  Licensed under the MIT License. See License.txt in the project root for license information.
   *--------------------------------------------------------------------------------------------*/
- 
+
 -import { BrowserWindow, nativeTheme } from 'electron';
 +import { nativeTheme } from 'electron';
- import { isWindows, isMacintosh } from 'vs/base/common/platform';
- import { IStateMainService } from 'vs/platform/state/electron-main/state';
- import { createDecorator } from 'vs/platform/instantiation/common/instantiation';
-@@ -67,20 +67,6 @@ export class ThemeMainService implements IThemeMainService {
- 			{ key: THEME_BG_STORAGE_KEY, data: splash.colorInfo.background },
+ import { Emitter, Event } from 'vs/base/common/event';
+ import { Disposable } from 'vs/base/common/lifecycle';
+ import { isLinux, isMacintosh, isWindows } from 'vs/base/common/platform';
+@@ -68,19 +68,6 @@ export class ThemeMainService implements IThemeMainService {
  			{ key: THEME_WINDOW_SPLASH, data: splash }
  		]);
--
+
 -		// Update in opened windows
 -		if (typeof windowId === 'number') {
 -			this.updateBackgroundColor(windowId, splash);
@@ -70,47 +43,54 @@
 -			}
 -		}
  	}
- 
+
  	getWindowSplash(): IPartsSplash | undefined {
+diff --git a/src/vs/platform/windows/electron-main/window.ts b/src/vs/platform/windows/electron-main/window.ts
 --- a/src/vs/platform/windows/electron-main/window.ts
 +++ b/src/vs/platform/windows/electron-main/window.ts
-@@ -179,7 +179,7 @@ export class CodeWindow extends Disposable implements ICodeWindow {
+@@ -157,7 +157,8 @@					width: this.windowState.width,
  				height: this.windowState.height,
  				x: this.windowState.x,
  				y: this.windowState.y,
 -				backgroundColor: this.themeMainService.getBackgroundColor(),
 +				transparent: true,
- 				minWidth: WindowMinimumSize.WIDTH,
- 				minHeight: WindowMinimumSize.HEIGHT,
- 				show: !isFullscreenOrMaximized,
++				backgroundColor: '#00000000' || this.themeMainService.getBackgroundColor(),
+				minWidth: WindowMinimumSize.WIDTH,
+				minHeight: WindowMinimumSize.HEIGHT,
+				show: !isFullscreenOrMaximized,
+diff --git a/src/vs/workbench/common/theme.ts b/src/vs/workbench/common/theme.ts
 --- a/src/vs/workbench/common/theme.ts
 +++ b/src/vs/workbench/common/theme.ts
-@@ -6,20 +6,24 @@
+@@ -6,23 +6,25 @@
  import { localize } from 'vs/nls';
- import { registerColor, editorBackground, contrastBorder, transparent, editorWidgetBackground, textLinkForeground, lighten, darken, focusBorder, activeContrastBorder, editorWidgetForeground, editorErrorForeground, editorWarningForeground, editorInfoForeground, treeIndentGuidesStroke, errorForeground, listActiveSelectionBackground, listActiveSelectionForeground } from 'vs/platform/theme/common/colorRegistry';
+ import { registerColor, editorBackground, contrastBorder, transparent, editorWidgetBackground, textLinkForeground, lighten, darken, focusBorder, activeContrastBorder, editorWidgetForeground, editorErrorForeground, editorWarningForeground, editorInfoForeground, treeIndentGuidesStroke, errorForeground, listActiveSelectionBackground, listActiveSelectionForeground, editorForeground } from 'vs/platform/theme/common/colorRegistry';
  import { IColorTheme } from 'vs/platform/theme/common/themeService';
 -import { Color } from 'vs/base/common/color';
+-import { ColorScheme } from 'vs/platform/theme/common/theme';
 +import { Color, RGBA } from 'vs/base/common/color';
- 
+
  // < --- Workbench (not customizable) --- >
- 
+
 -export function WORKBENCH_BACKGROUND(theme: IColorTheme): Color {
 -	switch (theme.type) {
--		case 'dark':
--			return Color.fromHex('#252526');
--		case 'light':
+-		case ColorScheme.LIGHT:
 -			return Color.fromHex('#F3F3F3');
--		default:
+-		case ColorScheme.HIGH_CONTRAST_LIGHT:
+-			return Color.fromHex('#FFFFFF');
+-		case ColorScheme.HIGH_CONTRAST_DARK:
 -			return Color.fromHex('#000000');
+-		default:
+-			return Color.fromHex('#252526');
 -	}
 -}
 +export const WORKBENCH_BACKGROUND = (theme: IColorTheme) => theme.getColor(
 +	registerColor(
 +		'workbench.background',
 +		{
-+			dark: '#252526',
 +			light: '#F3F3F3',
-+			hc: '#000000'
++			hcLight: '#FFFFFF',
++			hcDark: '#000000',
++			dark: '#252526'
 +		},
 +		localize(
 +			'workbenchBackground',
@@ -118,16 +98,6 @@
 +		)
 +	)
 +) || new Color(new RGBA(0, 0, 0, 0));
- 
+
  // < --- Tabs --- >
- 
---- a/src/vs/workbench/contrib/terminal/browser/terminalInstance.ts
-+++ b/src/vs/workbench/contrib/terminal/browser/terminalInstance.ts
-@@ -583,6 +583,7 @@ export class TerminalInstance extends Disposable implements ITerminalInstance {
- 			macOptionIsMeta: config.macOptionIsMeta,
- 			macOptionClickForcesSelection: config.macOptionClickForcesSelection,
- 			rightClickSelectsWord: config.rightClickBehavior === 'selectWord',
-+			allowTransparency: true,
- 			fastScrollModifier: 'alt',
- 			fastScrollSensitivity: editorOptions.fastScrollSensitivity,
- 			scrollSensitivity: editorOptions.mouseWheelScrollSensitivity,
+

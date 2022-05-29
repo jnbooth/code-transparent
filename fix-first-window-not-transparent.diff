@@ -1,0 +1,11 @@
+diff --git a/src/vs/code/electron-main/app.ts b/src/vs/code/electron-main/app.ts
+--- a/src/vs/code/electron-main/app.ts
++++ b/src/vs/code/electron-main/app.ts
+@@ -322,6 +322,7 @@
+ 	}
+
+ 	async startup(): Promise<void> {
++		await new Promise((resolve) => setTimeout(resolve, 400));
+ 		this.logService.debug('Starting VS Code');
+ 		this.logService.debug(`from: ${this.environmentService.appRoot}`);
+ 		this.logService.debug('args:', this.environmentService.args);

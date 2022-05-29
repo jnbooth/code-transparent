@@ -1,0 +1,12 @@
+diff --git a/src/vs/workbench/contrib/welcomeGettingStarted/browser/gettingStarted.ts b/src/vs/workbench/contrib/welcomeGettingStarted/browser/gettingStarted.ts
+--- a/src/vs/workbench/contrib/welcomeGettingStarted/browser/gettingStarted.ts
++++ b/src/vs/workbench/contrib/welcomeGettingStarted/browser/gettingStarted.ts
+@@ -773,7 +773,7 @@ export class GettingStartedPage extends EditorPane {
+ 				this.container.classList.add('noWalkthroughs');
+ 				reset(leftColumn, startList.getDomElement());
+ 				reset(rightColumn, recentList.getDomElement());
+-				recentList.setLimit(10);
++				recentList.setLimit(20);
+ 			}
+ 			setTimeout(() => this.categoriesPageScrollbar?.scanDomNode(), 50);
+ 		};
