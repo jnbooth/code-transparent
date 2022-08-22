@@ -1,6 +1,5 @@
-diff --git a/src/vs/code/electron-main/app.ts b/src/vs/code/electron-main/app.ts
---- a/src/vs/code/electron-main/app.ts
-+++ b/src/vs/code/electron-main/app.ts
+--- a/src/vs/code/electron-main/app.ts	2020-10-29 17:51:27.330706163 +0800
++++ b/src/vs/code/electron-main/app.ts	2020-11-24 14:11:33.058005352 +0800
 @@ -322,6 +322,7 @@
  	}
 

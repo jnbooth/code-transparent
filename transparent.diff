@@ -4,7 +4,7 @@ diff --git a/src/main.js b/src/main.js
 @@ -157,6 +157,10 @@ 			}
 		}
 	});
-
+ 
 +	// enable transparent
 +	app.commandLine.appendSwitch('enable-transparent-visuals');
 +	app.commandLine.appendSwitch('use-gl', 'desktop');
@@ -19,7 +19,7 @@ index 189811d6fdf..d10bd05bced 100644
 @@ -3,7 +3,7 @@
   *  Licensed under the MIT License. See License.txt in the project root for license information.
   *--------------------------------------------------------------------------------------------*/
-
+ 
 -import { BrowserWindow, nativeTheme } from 'electron';
 +import { nativeTheme } from 'electron';
  import { Emitter, Event } from 'vs/base/common/event';
@@ -28,7 +28,7 @@ index 189811d6fdf..d10bd05bced 100644
 @@ -68,19 +68,6 @@ export class ThemeMainService implements IThemeMainService {
  			{ key: THEME_WINDOW_SPLASH, data: splash }
  		]);
-
+ 
 -		// Update in opened windows
 -		if (typeof windowId === 'number') {
 -			this.updateBackgroundColor(windowId, splash);
@@ -43,7 +43,7 @@ index 189811d6fdf..d10bd05bced 100644
 -			}
 -		}
  	}
-
+ 
  	getWindowSplash(): IPartsSplash | undefined {
 diff --git a/src/vs/platform/windows/electron-main/window.ts b/src/vs/platform/windows/electron-main/window.ts
 --- a/src/vs/platform/windows/electron-main/window.ts
@@ -59,8 +59,8 @@ diff --git a/src/vs/platform/windows/electron-main/window.ts b/src/vs/platform/w
 				minHeight: WindowMinimumSize.HEIGHT,
 				show: !isFullscreenOrMaximized,
 diff --git a/src/vs/workbench/common/theme.ts b/src/vs/workbench/common/theme.ts
---- a/src/vs/workbench/common/theme.ts
-+++ b/src/vs/workbench/common/theme.ts
+--- a/src/vs/workbench/common/theme.ts	2020-04-21 11:28:02.140938188 +0800
++++ b/src/vs/workbench/common/theme.ts	2020-04-21 11:36:36.133491755 +0800
 @@ -6,23 +6,25 @@
  import { localize } from 'vs/nls';
  import { registerColor, editorBackground, contrastBorder, transparent, editorWidgetBackground, textLinkForeground, lighten, darken, focusBorder, activeContrastBorder, editorWidgetForeground, editorErrorForeground, editorWarningForeground, editorInfoForeground, treeIndentGuidesStroke, errorForeground, listActiveSelectionBackground, listActiveSelectionForeground, editorForeground } from 'vs/platform/theme/common/colorRegistry';
