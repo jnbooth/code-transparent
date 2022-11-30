@@ -14,8 +14,8 @@ pkgdesc='The Open Source build of Visual Studio Code (vscode) editor - with tran
 #   - fermium: 14
 #   - gallium: 16
 # Important: Remember to check https://github.com/microsoft/vscode/blob/master/.yarnrc (choose correct tag) for target electron version
-_electron=electron18
-pkgver=1.70.2
+_electron=electron19
+pkgver=1.73.1
 pkgrel=1
 arch=('x86_64')
 url='https://github.com/microsoft/vscode'
@@ -37,11 +37,11 @@ source=("$_pkgname::git+$url.git#tag=$pkgver"
         'fix-first-window-not-transparent.diff'
         'fix-terminal-not-transparent.diff')
 sha512sums=('SKIP'
-            'SKIP'
+            '03ca07b6d4c59adff8204e79ce740d0d697f8f7a3741a864700a6de70c95420e5a44aaf9436a507190c5dc21b5e9139a1745c7889c318518207ca165bd876a82'
             '6e8ee1df4dd982434a8295ca99e786a536457c86c34212546e548b115081798c5492a79f99cd5a3f1fa30fb71d29983aaabc2c79f4895d4a709d8354e9e2eade'
-            'b8bdb0e53cf8748140ed444c9b02cb6a57a7e1e120d96861d4cc9f79744a987f0253c052a238c78aa2c3f86459c4afb6f3b687435f0588d8f640822a9908b257'
-            'SKIP'
-            '83a66451909a1829982b8c412447bf1cd1e2bdf7eea9fe8dcbb5facff0bf4a0d36a57d6e88af58ad8c22e005be0201567469e0704cc5420b2d1b94e255fb4b28'
+            '940418c2c6bb9054baa68570bade23cb02fa66a5f6aa75f506fa9583acd3ff5e42a9c97f56a86059052b150e2a05e938c67dde379e57ec06f7250fc80be87e59'
+            '9e251e403cb98cd1c47724e2cf5b71e90f4f5574871d96fad089fb58943e6a6329e413527c666d44816591535d36faa31eb4a6c7222662d1f5dec57c169e602e'
+            '213d4bc9c856591b7401e2122729cd669f9e897b26ad9a2f183e767888dc3f62db1dc4c9144e07249de299a70fde4ccc6ff3db1b40ad968e81c59979f554fb40'
             'e662f0bf3f55a82ce9bce98f22c6be80ee83c1e2241d2eca596326478887ec6b73c7d0041903e17f35a424578ccc22674354931166dc7c7d7e76bb97135e009e'
             '2c047e9c10f9ae14c10ddfb36a1da6d8814a02213d35c9c5cd47a98da8b348797c32e8bc2ce8519485f45666501aded238074656af15efc67ad6140b3ff83942')
 
@@ -130,10 +130,9 @@ build() {
 
   yarn install --arch=$_vscode_arch
 
-  gulp compile-build
-  gulp compile-extension-media
-  gulp compile-extensions-build
-  gulp vscode-linux-$_vscode_arch-min
+  gulp --max_old_space_size=4096 \
+       --openssl-legacy-provider \
+       vscode-linux-$_vscode_arch-min
 }
 
 package() {
